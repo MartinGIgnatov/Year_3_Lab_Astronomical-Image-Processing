@@ -6,20 +6,25 @@ Created on Thu Jan 14 08:35:37 2021
 """
 
 import numpy as np
+import os
 from astropy.io import fits
 import matplotlib.pyplot as plt
 from scipy.stats import norm
 #%%
 
-#hdulist = fits.open("C:/MARTIN/Uni/Labs/Astro_Image/A1_mosaic.fits")
-hdulist = fits.open("C:/MARTIN/Uni/Labs/Astro_Image/A1_mosaic_noframe.fits")
+#hdulist = fits.open("/A1_mosaic.fits")
+fileDir = os.path.dirname(os.path.realpath('__file__'))
+filename = os.path.join(fileDir, '../Images/A1_mosaic_noframe.fits')
+hdulist = fits.open(filename)
 
 image = hdulist[0].data
 hdulist.close()
-print("Shape : f{image.shape}, original is 4611, 2570")
+print(f"Shape : {image.shape}, original is 4611, 2570")
 
 
 #%%
+
+## CREATE A HISTOGRAM FOR THE IMAGE
 
 data = image.flatten()
 
@@ -36,6 +41,7 @@ plt.show()
 
 #%%
 
+## EVALUATE BACKGROUND NOISE 
 
 data = image.flatten()
 
@@ -62,14 +68,11 @@ plt.show()
 
 #%%
 
-plt.figure(figsize = [25, 15])
-plt.imshow(image[::-1], vmin = 40000)#, cmap='gray')
-plt.colorbar()
-plt.show()
+# Show no borders
 
-
-#%%
+image[np.where(image == 0 )] = 50000
 
 plt.imshow(image[::-1], cmap='gray')
 plt.colorbar()
 plt.show()
+
