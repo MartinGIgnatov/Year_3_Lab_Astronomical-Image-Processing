@@ -47,7 +47,7 @@ plt.subplot(1,2,2)
 imshow(patchmask,extent=extent)
 
 # show(patchmask)
-
+#%%
 # import galaxy list
 galaxylist_raw=np.loadtxt('located_galaxies_00/galaxypositions-withcorner.txt')
 galaxylist=[]
@@ -56,7 +56,7 @@ for galaxy in galaxylist_raw:
     row, col, maxpix, numpix = galaxy
     if row > top and row < bottom:
         if col > left and col < right:
-            if maxpix>3465:
+            if maxpix>3465: # mean plus 3 standard deviations
                 galaxylist.append(galaxy)
             
             

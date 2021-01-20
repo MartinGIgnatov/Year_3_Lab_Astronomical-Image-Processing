@@ -106,12 +106,8 @@ blurred=convolve(patch, gaussian(sigma=2,N=5))
 
 show(blurred)
 
-
 sobelx=convolve(blurred,SOBELX)
 
 show(sobelx)
-
-
-
 
 # %%

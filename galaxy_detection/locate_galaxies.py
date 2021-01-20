@@ -15,19 +15,19 @@ def show(img):
 
 zscale=visualization.ZScaleInterval()
 
+# import original image
 filename = "A1_mosaic_nostar.fits" # with frame but no star
 hdulist=fits.open(filename)
 image = hdulist[0].data
 hdulist.close()
 
+# import mask
 filename = "mask.fits" # with frame but no star
 hdulist=fits.open(filename)
 mask = hdulist[0].data
 hdulist.close()
 
-# show(zscale(image))
-# show(mask)
-
+# remove large star at the center and borders from mask
 ignore_area=np.ones(mask.shape)
 ignore_area[2900:3500,1250:1642]=0
 ignoreborder=100
@@ -37,13 +37,13 @@ ignore_area[:,:ignoreborder]=0 # ignore left border
 ignore_area[:,-ignoreborder:]=0 # ignore right border
 mask=mask*ignore_area
 
-# imshow(mask)
 
+# select patch from whole image (used for testing)
 patch=image[1000:1200,1000:1200]
 patchmask=mask[1000:1200,1000:1200]
 
-# show(zscale(patch))
-# show(patchmask)
+show(zscale(patch))
+show(patchmask)
 
 
 #%%
@@ -51,6 +51,7 @@ patchmask=mask[1000:1200,1000:1200]
 # start algorithm, this can take about 1h !
 # =============================================================================
 
+# uncomment to use another patch useful for testing
 # patch=np.reshape(np.arange(64),(8,8))
 # patchmask=np.zeros(patch.shape)
 # patchmask[1:3,1:3]=1
@@ -72,7 +73,7 @@ def index_galaxies(image,mask,framewidth = 150):
     mask : 2D matrix
         mask which is 1 where a galaxy was spotted and 0 otherwise.
     framewidth : int, optional
-        Set a frame of widht framewidth around the mask to zero. The default is 150.
+        Set a frame around the mask to zero. The default is 150.
 
     Returns
     -------
@@ -113,26 +114,11 @@ def index_galaxies(image,mask,framewidth = 150):
         while len(checklist) != 0:
             # look for neighbouring elements  of pixels in checklist
             checkpixel=checklistpop(0)
-            # neighbours_list=[(-1,0), # up
-            #                   (0, 1), # right
-            #                   (1, 0), # down
-            #                   (0,-1), # left
-            #                   (1,1), # bottom right
-            #                   (1,-1), # bottom left
-            #                   (-1,1), # top right
-            #                   (-1,-1)] # top left
             localmask = tempmask[checkpixel[0]-2:checkpixel[0]+3,checkpixel[1]-2:checkpixel[1]+3]
             localwhitepixels= checkpixel - 2 + np.argwhere(localmask==1) 
             whitepixelextend(localwhitepixels)
             checklistextend(localwhitepixels)
             tempmask[checkpixel[0]-2:checkpixel[0]+3,checkpixel[1]-2:checkpixel[1]+3] = 0
-            
-            # for direction in neighbours_list:
-            #     neighbour = checkpixel + direction
-            #     if tempmask[neighbour[0],neighbour[1]] == 1:
-            #         checklistappend(neighbour) # add pixel to checklist
-            #         whitepixelsappend(neighbour) # add pixel to white pixels
-            #         tempmask[neighbour[0],neighbour[1]]=0 # remove pixel from mask
         
         white_pixels=np.array(white_pixels) # list of white pixels in the cluster
         numberpixels=len(white_pixels)
@@ -149,7 +135,7 @@ def index_galaxies(image,mask,framewidth = 150):
 
 timestart=time.time()
 galaxylist=np.array(index_galaxies(image, mask,150))
-# galaxylist=np.array(index_galaxies(patch, patchmask,1))
+# galaxylist=np.array(index_galaxies(patch, patchmask,1)) # uncommmento to test algorithm on patch
 timeend=time.time()
 timetotal=timeend-timestart
 print(f'\n\nTime taken: {timetotal}')
