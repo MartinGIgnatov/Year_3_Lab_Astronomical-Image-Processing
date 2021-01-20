@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import imshow
 from astropy.io import fits
-from PIL import Image
 from kernels import convolve,EDGEDETECTION,GAUSSIANBLUR,gaussian
 import astropy.visualization as visualization
 import time
@@ -16,12 +15,12 @@ def show(img):
 
 zscale=visualization.ZScaleInterval()
 
-filename = "galaxy_detection/A1_mosaic_nostar.fits" # with frame but no star
+filename = "A1_mosaic_nostar.fits" # with frame but no star
 hdulist=fits.open(filename)
 image = hdulist[0].data
 hdulist.close()
 
-filename = "galaxy_detection/mask.fits" # with frame but no star
+filename = "mask.fits" # with frame but no star
 hdulist=fits.open(filename)
 mask = hdulist[0].data
 hdulist.close()
@@ -55,7 +54,7 @@ patchmask=mask[1000:1200,1000:1200]
 # patch=np.reshape(np.arange(64),(8,8))
 # patchmask=np.zeros(patch.shape)
 # patchmask[1:3,1:3]=1
-# patchmask[6:,6:]=1
+# patchmask[5:-1,5:-1]=1
 
 def index_galaxies(image,mask,framewidth = 150):
     """
@@ -90,12 +89,12 @@ def index_galaxies(image,mask,framewidth = 150):
     tempmask[:,:framewidth]=0
     tempmask[:,-framewidth:]=0
     
-    i=0 # counting iterations
+    i=1 # counting iterations
     while len(np.argwhere(tempmask==1))!=0:
         
         # for every white pixel in the mask, find its cluster
         
-        stdout.write(f"Galaxy number: \r{i} / {len(np.argwhere(tempmask==1))}      ")
+        stdout.write(f"\rGalaxy number: {i} / {len(np.argwhere(tempmask==1))}      ")
         stdout.flush()
         i+=1
         
@@ -107,22 +106,33 @@ def index_galaxies(image,mask,framewidth = 150):
         # defining the functions before the loop should make the program faster
         checklistappend=checklist.append
         checklistpop=checklist.pop
-        whitepixelsappend=checklist.append
+        whitepixelsappend=white_pixels.append
+        whitepixelextend=white_pixels.extend
+        checklistextend=checklist.extend
         
         while len(checklist) != 0:
             # look for neighbouring elements  of pixels in checklist
             checkpixel=checklistpop(0)
-            neighbours_list=[(-1,0), # up
-                             (0, 1), # right
-                             (1, 0), # down
-                             (0,-1)] # left
+            # neighbours_list=[(-1,0), # up
+            #                   (0, 1), # right
+            #                   (1, 0), # down
+            #                   (0,-1), # left
+            #                   (1,1), # bottom right
+            #                   (1,-1), # bottom left
+            #                   (-1,1), # top right
+            #                   (-1,-1)] # top left
+            localmask = tempmask[checkpixel[0]-2:checkpixel[0]+3,checkpixel[1]-2:checkpixel[1]+3]
+            localwhitepixels= checkpixel - 2 + np.argwhere(localmask==1) 
+            whitepixelextend(localwhitepixels)
+            checklistextend(localwhitepixels)
+            tempmask[checkpixel[0]-2:checkpixel[0]+3,checkpixel[1]-2:checkpixel[1]+3] = 0
             
-            for direction in neighbours_list:
-                neighbour = checkpixel + direction
-                if tempmask[neighbour[0],neighbour[1]] == 1:
-                    checklistappend(neighbour) # add pixel to checklist
-                    whitepixelsappend(neighbour) # add pixel to white pixels
-                    tempmask[neighbour[0],neighbour[1]]=0 # remove pixel from mask
+            # for direction in neighbours_list:
+            #     neighbour = checkpixel + direction
+            #     if tempmask[neighbour[0],neighbour[1]] == 1:
+            #         checklistappend(neighbour) # add pixel to checklist
+            #         whitepixelsappend(neighbour) # add pixel to white pixels
+            #         tempmask[neighbour[0],neighbour[1]]=0 # remove pixel from mask
         
         white_pixels=np.array(white_pixels) # list of white pixels in the cluster
         numberpixels=len(white_pixels)
@@ -139,30 +149,22 @@ def index_galaxies(image,mask,framewidth = 150):
 
 timestart=time.time()
 galaxylist=np.array(index_galaxies(image, mask,150))
+# galaxylist=np.array(index_galaxies(patch, patchmask,1))
 timeend=time.time()
 timetotal=timeend-timestart
 print(f'\n\nTime taken: {timetotal}')
-print(f'first 10 galaxies: {galaxylist}')
+print(f'first galaxies: {galaxylist}')
+
+
 
 
 # uncomment to save the result (be careful not to overwrite existing data!)
-# np.savetxt('galaxy_detection/galaxgpositions.txt',galaxylist)
+np.savetxt('located_galaxies_00/galaxypositions-expanded.txt',galaxylist)
 
 
 # show(patchmask)
+# show(zscale(patch))
 # print(f'{galaxylist}')
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
