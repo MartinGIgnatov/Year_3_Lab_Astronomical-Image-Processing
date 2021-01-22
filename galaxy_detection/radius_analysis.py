@@ -7,6 +7,7 @@ import astropy.visualization as visualization
 import time
 from sys import stdout
 import tifffile as tiff
+import galaxy_list_filter as galaxyfilter
 plt.style.use('mystyle-2.mplstyle')
 
     
@@ -51,55 +52,32 @@ def show_gal(image, galaxy, radius_outer):
 
 
 #%%
-
-
-top=1742; bottom = 1997; left = 1862; right = 2104
-"""
-patch = image[1742:1997,1862:2104]
-patc_laplacian_treshold = laplacian_treshold[1742:1997,1862:2104]
-extent=np.array([left,right,bottom,top])-0.5
-"""
-"""
-plt.subplot(1,2,1)
-imshow(zscale(patch),extent=extent)
-plt.subplot(1,2,2)
-imshow(patchmask,extent=extent)
-plt.show()
-"""
-# show(patchmask)
-#%%
 # import galaxy list
-galaxylist_raw = np.loadtxt('located_galaxies_00/galaxypositions-withcorner.txt')
-galaxylist = []
 
 radius_inner = 15
 radius_outer = 30
 
-for galaxy in galaxylist_raw:
-    row, col, maxpix, numpix = galaxy
-    if row > top and row < bottom:
-        if col > left and col < right:
-            if ( row - radius_outer < 0 or image.shape[0] - row - radius_outer < 0 ) or\
-                ( col - radius_outer < 0 or image.shape[1] - col - radius_outer < 0 ):
-                continue
-            if maxpix > 3465 and maxpix < 35000:
-                galaxylist.append(galaxy)
-                
+ignore_border=150 # avoid galaxies too close to border
+
+# filter out galaxy list
+galaxylist_raw = np.loadtxt('located_galaxies_00/galaxypositions-final.txt')
+galaxylist = galaxyfilter.clean_list_galaxies(galaxylist_raw,min_brightness=3465,
+                                              max_brightness=35000,ignore_border=ignore_border,radius=radius_inner)
     
 
 background_image = np.copy(image)
 
 
-for num, galaxy in enumerate(galaxylist_raw):
+for num, galaxy in enumerate(galaxylist):
     
-    print(f" {num} of {len(galaxylist_raw)}")
+    print(f" {num} of {len(galaxylist)}")
     
     row, col, maxpix, numpix = galaxy
     
     row = int(row)
     col = int(col)
     
-    rop_image = image[row - radius_inner : row + radius_inner + 1,\
+    rop_image = background_image[row - radius_inner : row + radius_inner + 1,\
                       col - radius_inner : col + radius_inner + 1]
     
     x = np.arange(2*radius_inner + 1) - radius_inner
@@ -111,18 +89,26 @@ for num, galaxy in enumerate(galaxylist_raw):
     
     rop_image = rop_image * base_inner
     
-    image[row - radius_inner : row + radius_inner + 1,\
+    background_image[row - radius_inner : row + radius_inner + 1,\
                       col - radius_inner : col + radius_inner + 1] = rop_image
 
 
 hdu = fits.PrimaryHDU(background_image)
 hdu.writeto('background_image.fits')
 
+#%%
+
+
+filename = "background_image.fits" # with frame but no star
+hdulist=fits.open(filename)
+background_image = hdulist[0].data
+hdulist.close()
+
+show(zscale(background_image))
 
 
 #%%
 
-background_image = np.loadtxt("Background_Image.txt")
 
 galaxy_counts = []
 
