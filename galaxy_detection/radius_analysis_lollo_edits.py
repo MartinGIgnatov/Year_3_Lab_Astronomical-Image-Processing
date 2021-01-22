@@ -94,9 +94,10 @@ galaxylist = galaxyfilter.clean_list_galaxies(galaxylist_raw,
 background_image = np.copy(image)
 
 print('Creating Backgroud without stars')
+numbergalaxies=len(galaxylist)
 for num, galaxy in enumerate(galaxylist):
     
-    stdout.write(f"\rGalaxy {num} of {len(galaxylist)} {'='*(num//50)}>   ")
+    stdout.write(f"\rGalaxy {num} of {numbergalaxies} {'='*(num//50)}>   ")
     stdout.flush()
     
     row, col, maxpix, numpix = galaxy
@@ -126,6 +127,13 @@ hdu.writeto('galaxy_brightness_analysis_results/background_only_image.fits')
 
 #%%
 
+filename = "galaxy_brightness_analysis_results/background_only_image.fits" 
+hdulist=fits.open(filename)
+background_image = hdulist[0].data
+hdulist.close()
+
+galaxylist=np.loadtxt('galaxy_brightness_analysis_results/filtered_galaxy_list.txt')
+#%%
 galaxy_intensities_mean = []
 galaxy_intensities_std = []
 galaxy_background_mean = []
@@ -133,9 +141,9 @@ galaxy_background_std = []
 galaxy_number_inner_pixels = []
 
 numbergalaxies=len(galaxylist)
-for galaxy in galaxylist:
+for num, galaxy in enumerate(galaxylist):
     
-    stdout.write(f"\rGalaxy {num} of {len(galaxylist)} {'='*(num//50)}>   ")
+    stdout.write(f"\rGalaxy {num} of {numbergalaxies} {'='*(num//50)}>   ")
     stdout.flush()
     
     row, col, maxpix, numpix = galaxy
@@ -180,7 +188,7 @@ galaxydata = np.c_[galaxy_intensities_mean,galaxy_intensities_std,
                galaxy_background_mean,galaxy_background_std,
                galaxy_number_inner_pixels]
 
-np.savetxt('brightness_data.txt',galaxydata,header='intensity_mean \t\
+np.savetxt('galaxy_brightness_analysis_results/brightness_data.txt',galaxydata,header='intensity_mean \t\
             intensity_std \t backgroudn_mean \t backgroudn_std \t number_inner_pixels')
             
             
