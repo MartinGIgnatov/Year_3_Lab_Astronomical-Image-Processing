@@ -24,26 +24,26 @@ hdulist.close()
 # import mask
 filename = "mask.fits" # with frame but no star
 hdulist=fits.open(filename)
-mask = hdulist[0].data
+convolution_threshold = hdulist[0].data
 hdulist.close()
 
 # remove large star at the center and borders from mask
-ignore_area=np.ones(mask.shape)
+ignore_area=np.ones(convolution_threshold.shape)
 ignore_area[2900:3500,1250:1642]=0
 ignoreborder=100
-ignore_area[:ignoreborder,:]=0 # ignore top border
-ignore_area[-ignoreborder:,:]=0 # ignore bottom border
-ignore_area[:,:ignoreborder]=0 # ignore left border
-ignore_area[:,-ignoreborder:]=0 # ignore right border
-mask=mask*ignore_area
+# ignore_area[:ignoreborder,:]=0 # ignore top border
+# ignore_area[-ignoreborder:,:]=0 # ignore bottom border
+# ignore_area[:,:ignoreborder]=0 # ignore left border
+# ignore_area[:,-ignoreborder:]=0 # ignore right border
+convolution_threshold=convolution_threshold*ignore_area
 
 
 # select patch from whole image (used for testing)
 patch=image[1000:1200,1000:1200]
-patchmask=mask[1000:1200,1000:1200]
+patchthreshold=convolution_threshold[1000:1200,1000:1200]
 
 show(zscale(patch))
-show(patchmask)
+show(patchthreshold)
 
 
 #%%
@@ -105,9 +105,9 @@ def index_galaxies(image,mask,framewidth = 150):
         white_pixels=[(whitepixelcoor_y,whitepixelcoor_x)] # add pixel to white pixels list
         
         # defining the functions before the loop should make the program faster
-        checklistappend=checklist.append
+        # checklistappend=checklist.append
         checklistpop=checklist.pop
-        whitepixelsappend=white_pixels.append
+        # whitepixelsappend=white_pixels.append
         whitepixelextend=white_pixels.extend
         checklistextend=checklist.extend
         
@@ -134,7 +134,7 @@ def index_galaxies(image,mask,framewidth = 150):
 
 
 timestart=time.time()
-galaxylist=np.array(index_galaxies(image, mask,150))
+galaxylist=np.array(index_galaxies(image, convolution_threshold,3))
 # galaxylist=np.array(index_galaxies(patch, patchmask,1)) # uncommmento to test algorithm on patch
 timeend=time.time()
 timetotal=timeend-timestart
@@ -145,7 +145,7 @@ print(f'first galaxies: {galaxylist}')
 
 
 # uncomment to save the result (be careful not to overwrite existing data!)
-np.savetxt('located_galaxies_00/galaxypositions-expanded.txt',galaxylist)
+np.savetxt('located_galaxies_00/galaxypositions-final.txt',galaxylist)
 
 
 # show(patchmask)

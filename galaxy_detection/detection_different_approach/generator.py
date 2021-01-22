@@ -1,0 +1,1 @@
+import numpy as npN = 256def gaussian(sigma=0.85, N=3, intensity):    x = np.arange(N)-N//2    y = np.arange(N)-N//2    xx,yy=np.meshgrid(x,y)    gaussiankern=np.exp(-(xx**2 + yy**2)/(2*sigma**2))    gaussiankern=gaussiankern/np.sum(gaussiankern)    return gaussiankern

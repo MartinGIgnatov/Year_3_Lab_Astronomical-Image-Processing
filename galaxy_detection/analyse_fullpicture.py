@@ -7,12 +7,23 @@ from kernels import convolve,EDGEDETECTION,GAUSSIANBLUR,gaussian
 import astropy.visualization as visualization
 plt.style.use('mystyle-2.mplstyle')
 #%%
+# revisiting  code to make it clearer and potentially more effective
+
+maskpath='../Images/star_mask.fits'
+hdulist=fits.open(maskpath)
+starmask = hdulist[0].data
+hdulist.close()
+
+imshow(starmask)
+
+
+
+#%%
 #import original image
-filename = "galaxy_detection/A1_mosaic_nostar.fits" # with frame but no star
+filename = "A1_mosaic_nostar.fits" # with frame but no star
 hdulist=fits.open(filename)
 image = hdulist[0].data
 hdulist.close()
-
 # imshow(image)
 
 # try applying sequence of convolutions:
@@ -29,14 +40,14 @@ zscale=visualization.ZScaleInterval()
 plt.figure()
 imshow((conv[1200:1500,1700:2000]))
 plt.title('Convoluted image')
-plt.savefig('galaxy_detection/convoluted.png',dpi=400)
+plt.savefig('nice_images/convolution.png',dpi=400)
 
 
 
 plt.figure()
 imshow(zscale(image[1200:1500,1700:2000]))
 plt.title('zscale(original)')
-plt.savefig('galaxy_detection/original.png',dpi=400)
+plt.savefig('nice_images/original.png',dpi=400)
 
 # plt.xlim(1000,2000)
 # plt.ylim(2000,1000)
@@ -45,12 +56,12 @@ mask=np.where(conv[1200:1500,1700:2000]>threshold,1,0)
 plt.figure()
 imshow(mask)
 plt.title(f'Mask, threshold: {threshold}')
-plt.savefig('galaxy_detection/mask.png',dpi=400)
+plt.savefig('nice_images/convolution_threshold.png',dpi=400)
 
 # save mask
 mask=np.where(conv>threshold,1,0)
 hdu = fits.PrimaryHDU(mask)
-hdu.writeto('galaxy_detection/mask.fits')
+hdu.writeto('convolution_threshold.fits')
 
 
 # IDEA:
