@@ -31,7 +31,7 @@ for gal_count in galaxy_counts:
 plt.title("Histogram for Numbers to Magnitude")
 plt.hist(galaxy_magnitudes, bins = 100)
 
-plt.savefig("Histogram_Numbers_magnitude.png")
+plt.savefig("galaxy_brightness_analysis_results/Histogram_Numbers_magnitude.png")
 
 plt.show()
 
