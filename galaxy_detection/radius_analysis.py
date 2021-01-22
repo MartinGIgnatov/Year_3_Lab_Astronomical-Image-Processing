@@ -143,7 +143,7 @@ for galaxy in galaxylist:
     
     background = crop_back * base_outer
     
-    intensity =  crop_image * base_inner - background*(base_inner)
+    crop_image =  crop_image * base_inner
     
     intensity = intensity.flatten()
     background = background.flatten()
@@ -153,13 +153,16 @@ for galaxy in galaxylist:
     background_std = np.std(background[background.nonzero()])
     intensity_mean = np.mean(crop_image[crop_image.nonzero()])
     intensity_std = np.std(crop_image[crop_image.nonzero()])
-    number_inner_pixels = len(crop_image.nonzero())
+    buf = crop_image.flatten()
+    buf = buf[buf>0]
+    number_inner_pixels = len(buf)
     
     galaxy_intensities_mean.append(intensity_mean)
     galaxy_intensities_std.append(intensity_std)
     galaxy_background_mean.append(background_mean)
     galaxy_background_std.append(background_std)
     galaxy_number_inner_pixels.append(number_inner_pixels)
+    
 
 # this is out of the for loop
 # put acquired data into columns

@@ -15,19 +15,24 @@ zscale=visualization.ZScaleInterval()
 
 data = np.loadtxt('galaxy_brightness_analysis_results/brightness_data.txt')
 
-filename = "A1_mosaic.fits" # with frame but no star
+filename = "../Images/A1_mosaic.fits" # with frame but no star
 hdulist=fits.open(filename)
 header = hdulist[0].header
 hdulist.close()
 
 
 
-galaxy_counts = np.loadtxt("Galaxy_Counts.txt")
+galaxy_counts = (data[:,0] - data[:,2]) * data [:,4]
 galaxy_magnitudes = []
 
 for gal_count in galaxy_counts:
     galaxy_magnitudes.append(header["MAGZPT"] - 2.5 * np.log10(gal_count))
 
-plt.hist(galaxy_magnitudes)
+plt.title("Histogram for Numbers to Magnitude")
+plt.hist(galaxy_magnitudes, bins = 100)
+
+plt.savefig("Histogram_Numbers_magnitude.png")
+
+plt.show()
 
 #print(header["MAGZPT"])
