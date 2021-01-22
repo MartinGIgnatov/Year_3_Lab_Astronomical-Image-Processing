@@ -90,15 +90,20 @@ for galaxy in galaxylist_raw:
 background_image = np.copy(image)
 
 
+for num, galaxy in enumerate(galaxylist_raw):
     
+    print(f" {num} of {len(galaxylist_raw)}")
     
     row, col, maxpix, numpix = galaxy
     
     row = int(row)
     col = int(col)
     
-    x = np.arange(image.shape[1]) - col
-    y = np.arange(image.shape[0]) - row
+    rop_image = image[row - radius_inner : row + radius_inner + 1,\
+                      col - radius_inner : col + radius_inner + 1]
+    
+    x = np.arange(2*radius_inner + 1) - radius_inner
+    y = np.arange(2*radius_inner + 1) - radius_inner
     
     xx,yy=np.meshgrid(x,y)
     
