@@ -114,7 +114,7 @@ for num, galaxy in enumerate(galaxylist):
     background_image = background_image * base
 
 
-#%%
+
 #final galaxylist
 np.savetxt('galaxy_brightness_analysis_results/filtered_galaxy_list.txt',galaxylist)
 
@@ -134,6 +134,9 @@ galaxy_number_inner_pixels = []
 
 numbergalaxies=len(galaxylist)
 for galaxy in galaxylist:
+    
+    stdout.write(f"\rGalaxy {num} of {len(galaxylist)} {'='*(num//50)}>   ")
+    stdout.flush()
     
     row, col, maxpix, numpix = galaxy
     
