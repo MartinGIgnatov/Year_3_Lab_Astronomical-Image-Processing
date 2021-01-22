@@ -90,9 +90,7 @@ for galaxy in galaxylist_raw:
 background_image = np.copy(image)
 
 
-for num, galaxy in enumerate(galaxylist):
     
-    print(f" {num} of {len(galaxylist)}")
     
     row, col, maxpix, numpix = galaxy
     
@@ -104,14 +102,24 @@ for num, galaxy in enumerate(galaxylist):
     
     xx,yy=np.meshgrid(x,y)
     
-    base = ( yy**2 + xx**2 > radius_inner**2 )
+    base_inner = ( yy**2 + xx**2 > radius_inner**2 )
     
-    background_image = background_image * base
+    rop_image = rop_image * base_inner
+    
+    image[row - radius_inner : row + radius_inner + 1,\
+                      col - radius_inner : col + radius_inner + 1] = rop_image
+
+
+hdu = fits.PrimaryHDU(background_image)
+hdu.writeto('background_image.fits')
+
+
 
 #%%
 
-galaxy_intensities = []
-galaxy_background = []
+background_image = np.loadtxt("Background_Image.txt")
+
+galaxy_counts = []
 
 
 for galaxy in galaxylist:
@@ -146,10 +154,30 @@ for galaxy in galaxylist:
     intensity = np.sum(intensity)
     
     
-    galaxy_intensities.append(intensity)
-    galaxy_background.append(background)
+    galaxy_counts.append(intensity)
     
+np.savetxt("Galaxy_Counts.txt", galaxy_counts)
     
+
+#%%
+
+
+filename = "A1_mosaic.fits" # with frame but no star
+hdulist=fits.open(filename)
+header = hdulist[0].header
+hdulist.close()
+
+galaxy_counts = np.loadtxt("Galaxy_Counts.txt")
+galaxy_magnitudes = []
+
+for gal_count in galaxy_counts:
+    galaxy_magnitudes.append(header["MAGZPT"] - 2.5 * np.log10(gal_count))
+
+plt.hist(galaxy_magnitudes)
+
+#print(header["MAGZPT"])
+
+
 #%%
 
 index = 1
