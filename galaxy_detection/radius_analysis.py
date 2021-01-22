@@ -65,6 +65,10 @@ galaxylist = galaxyfilter.clean_list_galaxies(galaxylist_raw,min_brightness=3465
                                               max_brightness=35000,ignore_border=ignore_border,radius=radius_inner)
     
 
+
+#%%
+
+
 background_image = np.copy(image)
 
 
@@ -110,8 +114,11 @@ show(zscale(background_image))
 #%%
 
 
-galaxy_counts = []
-
+galaxy_intensities_mean = []
+galaxy_intensities_std = []
+galaxy_background_mean = []
+galaxy_background_std = []
+galaxy_number_inner_pixels = []
 
 for galaxy in galaxylist:
     row, col, maxpix, numpix = galaxy
@@ -135,39 +142,34 @@ for galaxy in galaxylist:
                       col - radius_outer : col + radius_outer + 1]
     
     background = crop_back * base_outer
-    background = background.flatten()
-    background = np.mean(background[background.nonzero()])
     
     intensity =  crop_image * base_inner - background*(base_inner)
-  
     
     intensity = intensity.flatten()
-    intensity = np.sum(intensity)
+    background = background.flatten()
     
     
-    galaxy_counts.append(intensity)
+    background_mean = np.mean(background[background.nonzero()])
+    background_std = np.std(background[background.nonzero()])
+    intensity_mean = np.mean(crop_image[crop_image.nonzero()])
+    intensity_std = np.std(crop_image[crop_image.nonzero()])
+    number_inner_pixels = len(crop_image.nonzero())
     
-np.savetxt("Galaxy_Counts.txt", galaxy_counts)
+    galaxy_intensities_mean.append(intensity_mean)
+    galaxy_intensities_std.append(intensity_std)
+    galaxy_background_mean.append(background_mean)
+    galaxy_background_std.append(background_std)
+    galaxy_number_inner_pixels.append(number_inner_pixels)
+
+# this is out of the for loop
+# put acquired data into columns
+galaxydata = np.c_[galaxy_intensities_mean,galaxy_intensities_std,
+                   galaxy_background_mean,galaxy_background_std,
+                   galaxy_number_inner_pixels]
+
+np.savetxt('galaxy_brightness_analysis_results/brightness_data.txt',galaxydata,header='intensity_mean \t\
+intensity_std \t backgroudn_mean \t backgroudn_std \t number_inner_pixels')
     
-
-#%%
-
-
-filename = "A1_mosaic.fits" # with frame but no star
-hdulist=fits.open(filename)
-header = hdulist[0].header
-hdulist.close()
-
-galaxy_counts = np.loadtxt("Galaxy_Counts.txt")
-galaxy_magnitudes = []
-
-for gal_count in galaxy_counts:
-    galaxy_magnitudes.append(header["MAGZPT"] - 2.5 * np.log10(gal_count))
-
-plt.hist(galaxy_magnitudes)
-
-#print(header["MAGZPT"])
-
 
 #%%
 
