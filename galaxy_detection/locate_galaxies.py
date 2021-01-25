@@ -61,7 +61,7 @@ def index_galaxies(image,mask,framewidth = 150):
     """
     returns a list of galaxy location in the following format:
         
-        col_number      row_number      max_brightnes       number_pixels
+        row_number      col_number      max_brightnes       number_pixels
     
     where max_brightnes is the maximum value among the pixels in the cluster
     as checked in the original image
