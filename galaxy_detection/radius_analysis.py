@@ -44,7 +44,7 @@ def show_gal(image, galaxy, radius_outer):
     y = np.arange(2*radius_outer + 1) - radius_outer
     
     xx,yy=np.meshgrid(x,y)
-    base = ( yy**2 + xx**2 <= radius_outer**2 )
+    #base = ( yy**2 + xx**2 <= radius_outer**2 )
     
     cut = image[row - radius_outer : row + radius_outer + 1,
                       col - radius_outer : col + radius_outer + 1]
@@ -55,7 +55,7 @@ def show_gal(image, galaxy, radius_outer):
 #%%
 # import galaxy list
 
-radius_inner = 15
+radius_inner = 12
 radius_outer = 30
 
 ignore_border=150 # avoid galaxies too close to border
@@ -72,10 +72,13 @@ galaxylist = galaxyfilter.clean_list_galaxies(galaxylist_raw,min_brightness=3465
 
 background_image = np.copy(image)
 
+background_galaxy_list = galaxyfilter.clean_list_galaxies(galaxylist_raw,min_brightness=3465,
+                                              max_brightness=80000,ignore_border=ignore_border,radius=radius_inner)
 
-for num, galaxy in enumerate(galaxylist):
+
+for num, galaxy in enumerate(background_galaxy_list):
     
-    print(f" {num} of {len(galaxylist)}")
+    print(f" {num} of {len(background_galaxy_list)}")
     
     row, col, maxpix, numpix = galaxy
     
@@ -84,6 +87,7 @@ for num, galaxy in enumerate(galaxylist):
     
     rop_image = background_image[row - radius_inner : row + radius_inner + 1,\
                       col - radius_inner : col + radius_inner + 1]
+        
     
     x = np.arange(2*radius_inner + 1) - radius_inner
     y = np.arange(2*radius_inner + 1) - radius_inner
