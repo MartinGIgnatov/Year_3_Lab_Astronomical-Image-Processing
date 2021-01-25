@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import imshow
 from astropy.io import fits
+import sys
 from kernels import convolve,EDGEDETECTION,GAUSSIANBLUR,gaussian
 import astropy.visualization as visualization
 import time
@@ -11,7 +12,7 @@ import galaxy_list_filter as galaxyfilter
 plt.style.use('mystyle-2.mplstyle')
 
     
-zscale=visualization.ZScaleInterval()
+zscale = visualization.ZScaleInterval()
 
 # import image
 filename = "A1_mosaic_nostar.fits" # with frame but no star
@@ -173,6 +174,30 @@ galaxydata = np.c_[galaxy_intensities_mean,galaxy_intensities_std,
 np.savetxt('galaxy_brightness_analysis_results/brightness_data.txt',galaxydata,header='intensity_mean \t\
 intensity_std \t backgroudn_mean \t backgroudn_std \t number_inner_pixels')
     
+
+#%%
+
+
+filename = "../Images/A1_mosaic.fits" # with frame but no star
+hdulist=fits.open(filename)
+header = hdulist[0].header
+hdulist.close()
+
+data = np.loadtxt('galaxy_brightness_analysis_results/brightness_data.txt')
+
+galaxy_counts = (data[:,0] - data[:,2]) * data [:,4]
+galaxy_magnitudes = []
+
+
+print(np.argwhere(galaxy_counts<0))
+
+"""
+for gal_count in galaxy_counts:
+    if gal_count > 0:
+        galaxy_magnitudes.append(header["MAGZPT"] - 2.5 * np.log10(gal_count))
+
+galaxy_magnitudes=np.array(galaxy_magnitudes)
+"""
 
 #%%
 
