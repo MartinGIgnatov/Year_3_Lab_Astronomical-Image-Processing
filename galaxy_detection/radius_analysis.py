@@ -55,8 +55,8 @@ def show_gal(image, galaxy, radius_outer):
 #%%
 # import galaxy list
 
-radius_inner = 15
-radius_outer = 30
+radius_inner = 14 # 15
+radius_outer = 24 # 30
 
 ignore_border=150 # avoid galaxies too close to border
 
@@ -64,8 +64,8 @@ ignore_border=150 # avoid galaxies too close to border
 galaxylist_raw = np.loadtxt('located_galaxies_00/galaxypositions-final.txt')
 galaxylist = galaxyfilter.clean_list_galaxies(galaxylist_raw,min_brightness=3465,
                                               max_brightness=35000,ignore_border=ignore_border,radius=radius_inner)
-    
 
+np.savetxt('galaxy_brightness_analysis_results/galaxylist_cleaned.txt',galaxylist,header='row\t col\t maxpix\t no. pix')
 
 #%%
 
@@ -99,12 +99,12 @@ for num, galaxy in enumerate(galaxylist):
 
 
 hdu = fits.PrimaryHDU(background_image)
-hdu.writeto('background_image.fits')
+hdu.writeto('galaxy_brightness_analysis_results/background_image.fits')
 
 #%%
 
 
-filename = "background_image.fits" # with frame but no star
+filename = "galaxy_brightness_analysis_results/background_image.fits" # with frame but no star
 hdulist=fits.open(filename)
 background_image = hdulist[0].data
 hdulist.close()
@@ -135,19 +135,21 @@ for galaxy in galaxylist:
     base_inner = ( yy**2 + xx**2 <= radius_inner**2 )
     base_outer = ( yy**2 + xx**2 <= radius_outer**2 ) * ( yy**2 + xx**2 > radius_inner**2 )
     
-    
+    # take a patch from the immage surrounding the galaxy
     crop_image = image[row - radius_outer : row + radius_outer + 1,\
                       col - radius_outer : col + radius_outer + 1]
-        
+    
+    # take the corresponding patch frmo the background
     crop_back = background_image[row - radius_outer : row + radius_outer + 1,\
                       col - radius_outer : col + radius_outer + 1]
+    
     
     background = crop_back * base_outer
     
     crop_image =  crop_image * base_inner
     
-    intensity = intensity.flatten()
-    background = background.flatten()
+    # intensity = intensity.flatten()
+    # background = background.flatten()
     
     
     background_mean = np.mean(background[background.nonzero()])
@@ -164,7 +166,7 @@ for galaxy in galaxylist:
     galaxy_background_std.append(background_std)
     galaxy_number_inner_pixels.append(number_inner_pixels)
     
-
+#%%
 # this is out of the for loop
 # put acquired data into columns
 galaxydata = np.c_[galaxy_intensities_mean,galaxy_intensities_std,
