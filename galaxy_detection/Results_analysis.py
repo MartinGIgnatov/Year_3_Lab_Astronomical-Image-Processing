@@ -58,7 +58,7 @@ print('Fit: ',fit)
 plt.plot(bins,logN,marker='s', label='Collected data',linestyle='None',
          markersize=4,fillstyle='none')
 
-plt.axvspan(fitting_range[0],fitting_range[1],alpha=0.1)
+plt.axvspan(fitting_range[0],fitting_range[1],alpha=0.1, label='fitting range')
 
 
 plotrange=np.linspace(10,16,100)
@@ -69,7 +69,7 @@ plt.legend()
 ax=plt.gca()
 ax.set_xlabel(r'Magnitude $\mathrm{m}$')
 ax.set_ylabel(r'$\mathrm{Log_{10}}$ (Number galaxies)')
-# plt.savefig("galaxy_brightness_analysis_results/Histogram_Numbers_magnitude.png")
+plt.savefig("galaxy_brightness_analysis_results/Histogram_Numbers_magnitude.png")
 
 
 plt.show()

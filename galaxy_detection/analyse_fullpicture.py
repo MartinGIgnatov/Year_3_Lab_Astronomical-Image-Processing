@@ -38,30 +38,31 @@ zscale=visualization.ZScaleInterval()
 
 
 plt.figure()
-imshow((conv[1200:1500,1700:2000]))
+imshow((conv[440:490,1580:1620]))
+# imshow(zscale(conv))
 plt.title('Convoluted image')
-plt.savefig('nice_images/convolution.png',dpi=400)
+# plt.savefig('nice_images/convolution.png',dpi=400)
 
-
+#%%
 
 plt.figure()
 imshow(zscale(image[1200:1500,1700:2000]))
 plt.title('zscale(original)')
-plt.savefig('nice_images/original.png',dpi=400)
+# plt.savefig('nice_images/original.png',dpi=400)
 
 # plt.xlim(1000,2000)
 # plt.ylim(2000,1000)
 threshold=15
-mask=np.where(conv[1200:1500,1700:2000]>threshold,1,0)
+mask=np.where(conv>threshold,1,0)
 plt.figure()
-imshow(mask)
+imshow(mask[440:490,1580:1620])
 plt.title(f'Mask, threshold: {threshold}')
-plt.savefig('nice_images/convolution_threshold.png',dpi=400)
+# plt.savefig('nice_images/convolution_threshold.png',dpi=400)
 
 # save mask
 mask=np.where(conv>threshold,1,0)
-hdu = fits.PrimaryHDU(mask)
-hdu.writeto('convolution_threshold.fits')
+# hdu = fits.PrimaryHDU(mask)
+# hdu.writeto('convolution_threshold.fits')
 
 
 # IDEA:
