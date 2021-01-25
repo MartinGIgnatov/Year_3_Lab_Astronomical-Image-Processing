@@ -5,7 +5,7 @@ import tifffile as tiff
 import os
 
 #get path
-path='Images/nostar_mask.tif'
+path='Images/temporary_folder/removed_most_stars.tif'
 filepath,filename=os.path.split(path)
 filepath+='/'
 
@@ -18,5 +18,8 @@ plt.imshow(im)
 savename=filename[:-4]+'.fits'
 hdu = fits.PrimaryHDU(im)
 hdu.writeto(filepath+savename)    
+
+#%%
+
 
 

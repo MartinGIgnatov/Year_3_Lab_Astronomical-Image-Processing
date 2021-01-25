@@ -1,0 +1,1 @@
+trying to create a new image where main stars are deleted by hand
