@@ -72,10 +72,12 @@ np.savetxt('galaxy_brightness_analysis_results/galaxylist_cleaned.txt',galaxylis
 
 background_image = np.copy(image)
 
+background_galaxylist = galaxyfilter.clean_list_galaxies(galaxylist_raw,min_brightness=3465,
+                                              max_brightness=70000,ignore_border=ignore_border,radius=radius_inner)
 
-for num, galaxy in enumerate(galaxylist):
+for num, galaxy in enumerate(background_galaxylist):
     
-    print(f" {num} of {len(galaxylist)}")
+    print(f" {num} of {len(background_galaxylist)}")
     
     row, col, maxpix, numpix = galaxy
     
