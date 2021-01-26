@@ -62,11 +62,15 @@ ignore_border=150 # avoid galaxies too close to border
 
 # filter out galaxy list
 galaxylist_raw = np.loadtxt('located_galaxies_00/galaxypositions-final.txt')
+print(galaxylist_raw[:,0].max())
+
 galaxylist = galaxyfilter.clean_list_galaxies(galaxylist_raw,min_brightness=3465,
                                               max_brightness=35000,ignore_border=ignore_border,radius=radius_inner)
 
 np.savetxt('galaxy_brightness_analysis_results/galaxylist_cleaned.txt',galaxylist,header='row\t col\t maxpix\t no. pix')
 
+
+# generate black pixel with galaxy in galaxylist marked as white
 #%%
 
 

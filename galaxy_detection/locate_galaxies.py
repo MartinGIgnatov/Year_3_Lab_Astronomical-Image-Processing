@@ -42,7 +42,7 @@ convolution_threshold=convolution_threshold*ignore_area
 patch=image[1000:1200,1000:1200]
 patchthreshold=convolution_threshold[1000:1200,1000:1200]
 
-show(zscale(patch))
+show(zscale(image))
 show(patchthreshold)
 
 
