@@ -69,6 +69,8 @@ galaxylist = galaxyfilter.clean_list_galaxies(galaxylist_raw,min_brightness=3465
 
 np.savetxt('galaxy_brightness_analysis_results/galaxylist_cleaned.txt',galaxylist,header='row\t col\t maxpix\t no. pix')
 
+
+# generate black pixel with galaxy in galaxylist marked as white
 #%%
 
 
