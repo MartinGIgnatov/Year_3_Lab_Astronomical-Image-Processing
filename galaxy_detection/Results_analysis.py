@@ -121,8 +121,8 @@ galaxy_mag_error_back = []
 for i in range(len(galaxy_counts)):
     if galaxy_counts[i] > 0 and 2.5 * np.log(10) * galaxy_counts_error[i] / galaxy_counts[i] <= 100:
         galaxy_mag.append(header["MAGZPT"] - 2.5 * np.log10(galaxy_counts[i]))
-        galaxy_mag_error.append(2.5 * np.log(10) * galaxy_counts_error[i] / galaxy_counts[i] )
-        galaxy_mag_error_back.append(2.5 * np.log(10) * galaxy_counts_error_back[i] / galaxy_counts[i])
+        galaxy_mag_error.append(2.5  * galaxy_counts_error[i] / galaxy_counts[i] / np.log(10) )
+        galaxy_mag_error_back.append(2.5 * galaxy_counts_error_back[i] / galaxy_counts[i] / np.log(10))
 
 
 galaxy_mag = np.array(galaxy_mag)
@@ -131,20 +131,16 @@ print(f'max magn: {galaxy_mag.max()}\nmin magn: {galaxy_mag.min()}')
 
 #%%
 
-
-plt.plot(galaxy_mag_error, label = "intensity")
-plt.plot( galaxy_mag_error_back , label = "back")
-plt.legend()
-plt.show()
-
-
-#%%
-
 plt.plot(galaxy_mag, label = "magnitude")
-plt.plot(galaxy_mag_error, label = "magnitude error")
+plt.plot(galaxy_mag_error, label = "intensity error")
+plt.plot( galaxy_mag_error_back , label = "back error")
 plt.legend()
 plt.show()
+
+
 #%%
+
+###       TEST
 
 mean = np.array([1,2,3])
 std = np.array([3,2,1])
@@ -158,13 +154,16 @@ print(buf < 2)
 
 
 #%%
+
+###               SIMULATION
+
 bins=np.arange(11,18,0.3)
 number_galaxies = []
 number_galaxies_error = []
 
 repetitions = 100000
 
-dist = normal(loc = galaxy_mag, scale = galaxy_mag_error/2, size = (repetitions, len(galaxy_mag)))
+dist = normal(loc = galaxy_mag, scale = galaxy_mag_error, size = (repetitions, len(galaxy_mag)))
 
 mean = dist.mean(axis = 0)
 std  = dist.std(axis = 0) 
@@ -204,6 +203,7 @@ plt.show()
 #%%
 
 bin_index = 15
+plt.figure()
 plt.hist(bins_N[bin_index,:], bins = 86)
 plt.show()
 
@@ -219,14 +219,16 @@ print(f" log mean : {np.log10(bins_N[bin_index,:]).mean()}, mean log : {np.log10
 cov_in = np.zeros((len(number_galaxies), len(number_galaxies)))
 
     
-
+####  ONLY INTENSITY ERROR
 logN = np.log10(number_galaxies)
-logN_error = number_galaxies_error/number_galaxies
+logN_error = number_galaxies_error/number_galaxies/np.log(10)
 
-plt.plot(logN, label = "mean")
-plt.plot(logN_error, label = "std")
-plt.legend()
-plt.show()
+"""
+####  ONLY POISSON ERROR
+logN = np.log10(number_galaxies_old)
+logN_error = 1/(number_galaxies**0.5)/np.log(10)
+"""
+
 
 #%%
 
