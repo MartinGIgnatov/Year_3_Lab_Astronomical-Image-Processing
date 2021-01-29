@@ -107,7 +107,7 @@ plt.show()
 
 
 #%%
-
+# data: # inner_mean, background_mean, backrgound_error, inner_number_pixels, outer_number_pixels
 galaxy_counts = (data[:,0] - data[:,1]) * data [:,3]
 galaxy_counts_error = ( data[:,0]  * data [:,3] )**0.5
 galaxy_counts_error_back = data[:,2] * (data [:,3]**0.5)
@@ -130,7 +130,7 @@ galaxy_mag_error = ( np.array(galaxy_mag_error)**2 + np.array(galaxy_mag_error_b
 print(f'max magn: {galaxy_mag.max()}\nmin magn: {galaxy_mag.min()}')
 
 #%%
-
+plt.figure()
 plt.plot(galaxy_mag, label = "magnitude")
 plt.plot(galaxy_mag_error, label = "intensity error")
 plt.plot( galaxy_mag_error_back , label = "back error")
@@ -191,7 +191,6 @@ for i in range(len(bins)):
 number_galaxies_old = np.array(number_galaxies_old)
 
 
-
 #%%
 
 plt.plot(number_galaxies, "rd",label = "new")
@@ -244,23 +243,23 @@ fit,cov_matr = curve_fit(linear_function, bins[goodindexes].ravel(), logN[goodin
 #fit,cov_matr = np.polyfit(bins[goodindexes][:,0],logN[goodindexes][:,0],1,cov=True)
 #polynomial = np.poly1d(fit)
 
-print(f'Fit: ,{fit}, {cov_matr**0.5}')
+print(f'Fit: ,{fit}, {cov_matr}')
 
-plt.plot(bins,logN,marker='s', label='Collected data',linestyle='None',
-         markersize=4,fillstyle='none')
+plt.errorbar(bins,logN,logN_error, marker='s', label='Collected data',linestyle='None',
+         markersize=4,fillstyle='none', capsize = 4)
 
 plt.axvspan(fitting_range[0],fitting_range[1],alpha=0.1)
 
 
-plotrange=np.linspace(10,16,100)
+plotrange=np.linspace(11,16,100)
 plt.plot(plotrange,linear_function(plotrange, fit[0], fit[1]),color='Black',linestyle= '-',linewidth=0.7,
          label='Linear fit')
-plt.text(15,1.5,f'Gradient: {fit[0]:.2f}',fontsize=14)
+plt.text(13,1.5,rf'Gradient: ${fit[0]:.3f}\pm{np.sqrt(cov_matr[0][0]):.3f}$',fontsize=14)
 plt.legend()
 ax=plt.gca()
 ax.set_xlabel(r'Magnitude $\mathrm{m}$')
 ax.set_ylabel(r'$\mathrm{Log_{10}}$ (Number galaxies)')
-# plt.savefig("galaxy_brightness_analysis_results/Histogram_Numbers_magnitude.png")
+plt.savefig("galaxy_brightness_analysis_results/Histogram_Numbers_errorbars.png")
 
 
 plt.show()
@@ -286,8 +285,8 @@ show_negative_flux(3)
 
 plt.figure()
 imshow(zscale(image))
-
 """
+
 
 
 

@@ -15,7 +15,12 @@ starmask = hdulist[0].data
 hdulist.close()
 
 imshow(starmask)
-
+#%%
+# read header
+filename = "../Images/A1_mosaic.fits" # with frame but no star
+hdulist=fits.open(filename)
+header = hdulist[0].header
+hdulist.close()
 
 
 #%%
