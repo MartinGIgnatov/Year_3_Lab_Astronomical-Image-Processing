@@ -173,7 +173,8 @@ print(dist.shape, mean - galaxy_mag, std - galaxy_mag_error)
 bins_N = np.zeros((len(bins), repetitions))
 
 for j in range(repetitions):
-
+    stdout.write(f'\r{j}/{repetitions}')
+    stdout.flush()
     for i in range(len(bins)):
         
         bins_N[i,j] = len(np.argwhere(dist[j] < bins[i]))
@@ -218,17 +219,51 @@ print(f" log mean : {np.log10(bins_N[bin_index,:]).mean()}, mean log : {np.log10
 cov_in = np.zeros((len(number_galaxies), len(number_galaxies)))
 
     
-####  ONLY INTENSITY ERROR
+####  INTENSITY AND POISSON ERROR
 logN = np.log10(number_galaxies)
 logN_error = number_galaxies_error/number_galaxies/np.log(10)
+
+poisson_error = np.sqrt(number_galaxies)
+
+N_error = np.sqrt(number_galaxies_error**2 + poisson_error**2)
+log_N_error_up = np.log10(number_galaxies + N_error) - logN
+log_N_error_down = logN - np.log10(number_galaxies - N_error)
 
 """
 ####  ONLY POISSON ERROR
 logN = np.log10(number_galaxies_old)
 logN_error = 1/(number_galaxies**0.5)/np.log(10)
 """
+#%% Compare two errors
+relative_poisson = poisson_error/number_galaxies
+relative_brightness = number_galaxies_error/number_galaxies
 
+relative_poisson_brightness = poisson_error/number_galaxies_error
 
+plt.figure()
+ax=plt.gca()
+line1 = ax.plot(bins, relative_poisson * 100,label=r'Poisson Percentage Error')
+line2 = ax.plot(bins, relative_brightness * 100,label=r'Brightness Percentage Error',
+         color = 'Black', linestyle='--')
+
+# plot ratio of two errors
+ax2colour = 'Blue'
+ax.set_xlabel(r'Magnitude $\mathrm{m}$')
+ax.set_ylabel(r'[Error $\div$ No. Galaxies] $\times 100$')
+ax2 = ax.twinx()
+line3 = ax2.plot(bins, relative_poisson_brightness, color=ax2colour,
+                 label=r'Poisson error $\div$ Brightness errors')
+
+# create common legend
+lines = line1+line2#+line3
+labs = [l.get_label() for l in lines]
+ax2.legend(lines, labs, facecolor='lightskyblue',framealpha=0.5,loc = 1,fontsize=13)
+
+ax2.tick_params(axis='y', colors=ax2colour)
+ax2.set_ylabel(r'Poisson error $\div$ Brightness errors', rotation = -90,labelpad = 20,
+               color=ax2colour)
+ax2.set_ylim(0,5)
+plt.savefig('galaxy_brightness_analysis_results/errors_comparison.png',dpi=400)
 #%%
 
 
@@ -245,8 +280,12 @@ fit,cov_matr = curve_fit(linear_function, bins[goodindexes].ravel(), logN[goodin
 
 print(f'Fit: ,{fit}, {cov_matr}')
 
-plt.errorbar(bins,logN,logN_error, marker='s', label='Collected data',linestyle='None',
-         markersize=4,fillstyle='none', capsize = 4)
+plt.errorbar(bins,logN,yerr = (log_N_error_up, log_N_error_down), marker='s',
+             label='Resampled data',linestyle='None',
+         markersize=4,fillstyle='none', capsize = 2, color = 'Black')
+
+plt.plot(bins, np.log10(number_galaxies_old), marker = 'o', color ='Green', linestyle = 'None',
+         fillstyle='none', label = 'Original Data')
 
 plt.axvspan(fitting_range[0],fitting_range[1],alpha=0.1)
 
