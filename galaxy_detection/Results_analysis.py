@@ -301,9 +301,29 @@ ax.set_ylabel(r'$\mathrm{Log_{10}}$ (Number galaxies)')
 plt.savefig("galaxy_brightness_analysis_results/Histogram_Numbers_errorbars.png")
 
 
-plt.show()
+# plt.show()
 
 
+from simulate_distribution import get_points
+low = 0
+high = 18
+
+a = get_points(3837*100,0.36111444, -2.67273998,low,high)
+
+binrange = np.arange(11,high,0.3)
+
+totalN = []
+
+for bn in binrange:
+    totalN.append(len(np.argwhere(a <= bn)))
+totalN = np.array(totalN)
+print(f'total N: {totalN}')
+
+skipfirst = 0
+binrange = binrange[skipfirst:]
+totalN = totalN[skipfirst:]
+
+plt.plot(binrange,np.log10(totalN)-2)
 
 
 #%%
