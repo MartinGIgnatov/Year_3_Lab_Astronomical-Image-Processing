@@ -137,8 +137,8 @@ print(dist.shape, mean - galaxy_mag, std - galaxy_mag_error)
 bins_N = np.zeros((len(bins), repetitions))
 
 for j in range(repetitions):
-    stdout.write(f'\r{j}/{repetitions}')
-    stdout.flush()
+    #stdout.write(f'\r{j}/{repetitions}')
+    #stdout.flush()
     for i in range(len(bins)):
         
         bins_N[i,j] = len(np.argwhere(dist[j] < bins[i]))
@@ -318,8 +318,8 @@ plt.plot(number_galaxies_old_separate)
 def error_func(x, a, b ,d):
     return np.exp(x/b - a) + d
 
-fit_galaxy_mag = galaxy_mag[galaxy_mag<16]
-fit_galaxy_mag_error = galaxy_mag_error[galaxy_mag<16]
+fit_galaxy_mag = galaxy_mag[galaxy_mag<18]
+fit_galaxy_mag_error = galaxy_mag_error[galaxy_mag<18]
 
 plt.figure()
 plt.plot(fit_galaxy_mag, fit_galaxy_mag_error,"rd")
@@ -334,32 +334,41 @@ plt.plot(x, error_func(x, fit_fake[0], fit_fake[1], fit_fake[2]))
 print(fit_fake)
 
 
-N_below = np.exp(fit[0] * 10.7 + fit[1])
-N_above = np.exp(fit[0] * 24 + fit[1]) - np.exp(fit[0] * 16.3 + fit[1])
+N_below = int(10**(fit[0] * 10.7 + fit[1]) - 10**(fit[1]))
+N_above = int(10**(fit[0] * 24 + fit[1]) - 10**(fit[0] * 16.3 + fit[1]))
 
 fake_points = np.concatenate((get_points( N_below, fit[0], fit[1], 0, 10.7), get_points( N_above, fit[0], fit[1], 16.3, 24)))
 
+fake_points = get_points( N_below, fit[0], fit[1], 0, 10.7)
+
 fake_points_errors = error_func(fake_points, fit_fake[0], fit_fake[1], fit_fake[2])
 
-fake_real_mag =  np.concatenate((galaxy_mag, fake_points  ))
-fake_real_mag_error =  np.concatenate((galaxy_mag_error, fake_points_errors  ))
+fake_real_mag =  np.concatenate((galaxy_mag[galaxy_mag < 18], fake_points  ))
+fake_real_mag_error =  np.concatenate((galaxy_mag_error[galaxy_mag < 18], fake_points_errors  ))
+
+#%%
+
+plt.figure()
+plt.hist(fake_real_mag, bins = 1000)
+plt.show()
 
 
-repetitions_real_fake = repetitions/10
+#%%
+
+repetitions_real_fake = int(repetitions/10)
 
 dist = normal(loc = fake_real_mag, scale = fake_real_mag_error, size = (repetitions_real_fake, len(fake_real_mag)))
 
 mean = dist.mean(axis = 0)
 std  = dist.std(axis = 0) 
 
-print(dist.shape, mean - galaxy_mag, std - galaxy_mag_error)
+print(dist.shape, mean - fake_real_mag, std - fake_real_mag_error)
 
 bins_N_real_fake = np.zeros((len(bins), repetitions_real_fake))
 
 
 for j in range(repetitions_real_fake):
-    stdout.write(f'\r{j}/{repetitions_real_fake}')
-    stdout.flush()
+    
     for i in range(len(bins)):
         
         bins_N_real_fake[i,j] = len(np.argwhere(dist[j] < bins[i]))
@@ -371,9 +380,15 @@ number_galaxies_real_fake_error = bins_N_real_fake.std(axis = 1)
 logN_real_fake = np.log10(number_galaxies_real_fake)
 logN_real_fake_error = number_galaxies_real_fake_error/number_galaxies_real_fake/np.log(10)
 
+bins_N_real_fake_basic = []
+for i in range(len(bins)):
+        
+    bins_N_real_fake_basic.append( len(np.argwhere(fake_real_mag < bins[i])))
+
 
 plt.figure()
 plt.plot(bins,logN_real_fake, label = "real_fake")
+plt.plot(bins, np.log10(bins_N_real_fake_basic), label = "Basic fake real")
 plt.plot(bins,logN, label = "sim")
 plt.plot(bins,np.log10(number_galaxies_old), label = "old")
 plt.legend()
