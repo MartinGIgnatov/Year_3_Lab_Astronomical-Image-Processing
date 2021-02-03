@@ -301,6 +301,18 @@ totalN = totalN[skipfirst:]
 
 #%%
 
+number_galaxies_old_separate = []
+
+for i in range(len(bins) - 1):
+    number_galaxies_old_separate.append(len(np.argwhere( np.abs(galaxy_mag - bins[i] - 0.15) < 0.15 )))
+
+number_galaxies_old_separate = np.array(number_galaxies_old_separate)[goodindexes]
+
+plt.plot(number_galaxies_old_separate)
+
+
+#%%
+
 ###   Generate fake points
 
 def error_func(x, a, b ,d):
