@@ -182,20 +182,20 @@ print(f" log mean : {np.log10(bins_N[bin_index,:]).mean()}, mean log : {np.log10
 
 
 #%%
-    
+     
 ####       Calculate the two sources of error, from the poisson and the mags
     
 ####  INTENSITY AND POISSON ERROR
-logN = np.log10(number_galaxies)
-logN_error = number_galaxies_error/number_galaxies/np.log(10)
+logN = np.log10(number_galaxies_old)
+logN_error = number_galaxies_error/number_galaxies_old/np.log(10)
 
-poisson_error = np.sqrt(number_galaxies)
+poisson_error = np.sqrt(number_galaxies_old)
 
 logN_error_total = (logN_error**2 + poisson_error**2)**0.5
 
 N_error = np.sqrt(number_galaxies_error**2 + poisson_error**2)
-log_N_error_up = np.log10(number_galaxies + N_error) - logN
-log_N_error_down = logN - np.log10(number_galaxies - N_error)
+log_N_error_up = np.log10(number_galaxies_old + N_error) - logN
+log_N_error_down = logN - np.log10(number_galaxies_old - N_error)
 
 """
 ####  ONLY POISSON ERROR
@@ -204,12 +204,15 @@ logN_error = 1/(number_galaxies**0.5)/np.log(10)
 """
 
 
+
+
+
 #%% 
 
 ###    Compare two errors
 
-relative_poisson = poisson_error/number_galaxies
-relative_brightness = number_galaxies_error/number_galaxies
+relative_poisson = poisson_error/number_galaxies_old
+relative_brightness = number_galaxies_error/number_galaxies_old
 
 relative_poisson_brightness = poisson_error/number_galaxies_error
 
@@ -242,12 +245,69 @@ plt.savefig('galaxy_brightness_analysis_results/errors_comparison.png',dpi=400)
 
 
 #%%
+# import extintion ratio plot
+import scipy as sp
+import scipy.interpolate
+import scipy.ndimage
 
+magnitude, ratio = np.loadtxt('galaxy_brightness_analysis_results/extintion_ratio.txt',
+                              unpack= True)
+#try reduce noise by mean of a filtering
+
+sigmafilter = 0.8
+gaussianfilter = 1/(np.sqrt(2*np.pi) * sigmafilter)*\
+    np.exp(-np.arange(-2,3)**2/(2*sigmafilter**2))
+gaussianfilter = gaussianfilter/np.sum(gaussianfilter)
+
+filtered_ratio = sp.ndimage.convolve(ratio, gaussianfilter, mode='reflect')
+
+# filtered_ratio = ratio
+# fit = np.polyfit(magnitude, ratio, deg = 10)
+# pol = np.poly1d(fit)
+
+
+interpolateRatio = sp.interpolate.interp1d(magnitude, filtered_ratio, kind='cubic')
+
+plt.plot(magnitude,ratio, label = 'original data')
+plt.plot(magnitude, filtered_ratio, label = 'filtered data')
+plt.legend()
+# plt.plot(magnitude, pol(magnitude))
+#%%
+#correct data with extintion ratio.
+plotting_range=(11,18)
+
+number_list = []
+correcting_bins=np.arange(11,21.9,0.1)
+corrected_counts = []
+for i in range(len(correcting_bins)-1):
+    bin_current = correcting_bins[i]
+    bin_next = correcting_bins[i+1]
+    averagebin = (bin_current + bin_next)/2
+    no_counts = len(np.argwhere((galaxy_mag < bin_next) & (galaxy_mag >=bin_current)))
+    corrected_no_counts = no_counts / interpolateRatio(averagebin)
+    corrected_counts.append(corrected_no_counts)
+    
+    print(no_counts, ' - ', corrected_no_counts)
+corrected_counts.insert(0, len(np.argwhere(galaxy_mag < correcting_bins[0])))
+corrected_counts = np.array(corrected_counts)
+corrected_N = []
+for i in range(len(bins)):
+    
+    counts_up_to_bin_i = corrected_counts[correcting_bins<=bins[i]]
+    print(len(counts_up_to_bin_i))
+    counts_up_to_bin_i = np.sum(counts_up_to_bin_i)
+    corrected_N.append(counts_up_to_bin_i)
+    
+#%%
 # fitting line
 fitting_range = (11,16)
 goodindexes=np.argwhere((bins>=fitting_range[0]) & (bins<=fitting_range[1]))
 
-print( bins[goodindexes].shape, logN[goodindexes].shape, logN_error[goodindexes].shape)
+
+
+def linear_function(x, a, b):
+    return a * x + b
+
 
 fit,cov_matr = curve_fit(linear_function, bins[goodindexes].ravel(), logN[goodindexes].ravel(), sigma = logN_error[goodindexes].ravel())
 
@@ -255,28 +315,45 @@ fit,cov_matr = curve_fit(linear_function, bins[goodindexes].ravel(), logN[goodin
 #polynomial = np.poly1d(fit)
 
 print(f'Fit: ,{fit}, {cov_matr}')
-plt.figure()
-plt.errorbar(bins,logN,yerr = (log_N_error_up, log_N_error_down), marker='s',
-             label='Resampled data',linestyle='None',
+plt.figure(figsize=(8,5))
+ax=plt.gca()
+
+line1 = ax.errorbar(bins,logN,yerr = (log_N_error_up, log_N_error_down), marker='s',
+             label='Experimental Data',linestyle='None',
          markersize=4,fillstyle='none', capsize = 2, color = 'Black')
 
-plt.plot(bins, np.log10(number_galaxies_old), marker = 'o', color ='Green', linestyle = 'None',
-         fillstyle='none', label = 'Original Data')
+line2 = ax.plot(bins, np.log10(corrected_N), linestyle = '--', linewidth = 0.7, label = 'Corrected Data')
 
-plt.axvspan(fitting_range[0],fitting_range[1],alpha=0.1)
+line3 = ax.axvspan(fitting_range[0],fitting_range[1],alpha=0.1, label ='fitting range')
 
 
-plotrange=np.linspace(11,16,100)
-plt.plot(plotrange,linear_function(plotrange, fit[0], fit[1]),color='Black',linestyle= '-',linewidth=0.7,
+plotrange=np.linspace(11,18,100)
+line4 = ax.plot(plotrange,linear_function(plotrange, fit[0], fit[1]),color='tab:red',linestyle= '-',linewidth=0.7,
          label='Linear fit')
-plt.text(13,1.5,rf'Gradient: ${fit[0]:.3f}\pm{np.sqrt(cov_matr[0][0]):.3f}$',fontsize=14)
-plt.legend()
-ax=plt.gca()
+plt.text(12,3.5,rf'Gradient: ${fit[0]:.3f}\pm{np.sqrt(cov_matr[0][0]):.3f}$',fontsize=14,color='tab:red')
+# plt.legend()
 ax.set_xlabel(r'Magnitude $\mathrm{m}$')
 ax.set_ylabel(r'$\mathrm{Log_{10}}$ (Number galaxies)')
-plt.savefig("galaxy_brightness_analysis_results/Histogram_Numbers_errorbars.png")
 
 
+ax2 = ax.twinx()
+line5 = ax2.plot(magnitude, filtered_ratio,color = 'Blue', alpha = 0.5, label ='Extinction ratio')
+ax2.set_ylabel(r'Extinction ratio $\eta$', rotation = -90,labelpad = 20)
+ax2.tick_params(axis='y', colors='Blue')
+
+
+# create common legend
+lines = (line1,line2[0],line3,line4[0],line5[0])
+labs = [l.get_label() for l in lines]
+ax2.legend(lines, labs, facecolor='White',framealpha=1,loc = 5,fontsize=13,
+           shadow = False)#.get_frame().set_boxstyle('Round', pad=0, rounding_size=0)
+
+# plt.savefig("galaxy_brightness_analysis_results/histogram.png", dpi = 400)
+
+
+
+
+#%%
 # plt.show()
 
 

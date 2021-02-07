@@ -67,7 +67,7 @@ print(galaxylist_raw[:,0].max())
 galaxylist = galaxyfilter.clean_list_galaxies(galaxylist_raw,min_brightness=3465,
                                               max_brightness=35000,ignore_border=ignore_border,radius=radius_inner)
 
-np.savetxt('galaxy_brightness_analysis_results/galaxylist_cleaned.txt',galaxylist,header='row\t col\t maxpix\t no. pix')
+# np.savetxt('galaxy_brightness_analysis_results/galaxylist_cleaned.txt',galaxylist,header='row\t col\t maxpix\t no. pix')
 
 
 # generate black pixel with galaxy in galaxylist marked as white
@@ -104,8 +104,8 @@ for num, galaxy in enumerate(background_galaxylist):
                       col - radius_inner : col + radius_inner + 1] = rop_image
 
 
-hdu = fits.PrimaryHDU(background_image)
-hdu.writeto('galaxy_brightness_analysis_results/background_image.fits')
+# hdu = fits.PrimaryHDU(background_image)
+# hdu.writeto('galaxy_brightness_analysis_results/background_image.fits')
 
 #%%
 
@@ -179,8 +179,8 @@ galaxydata = np.c_[galaxy_intensities_mean,galaxy_intensities_std,
                    galaxy_background_mean,galaxy_background_std,
                    galaxy_number_inner_pixels]
 
-np.savetxt('galaxy_brightness_analysis_results/brightness_data.txt',galaxydata,header='intensity_mean \t\
-intensity_std \t backgroudn_mean \t backgroudn_std \t number_inner_pixels')
+# np.savetxt('galaxy_brightness_analysis_results/brightness_data.txt',galaxydata,header='intensity_mean \t\
+# intensity_std \t backgroudn_mean \t backgroudn_std \t number_inner_pixels')
     
 
 #%%

@@ -231,8 +231,12 @@ for index, gal in enumerate(galaxylist):
 plt.figure()
 imshow(zscale(background_image))
 
+hdu = fits.PrimaryHDU(background_image)
+hdu.writeto('fake_images/background_image.fits')
 #%%
+np.savetxt('fake_images/radius_list.txt', radius_list)
 
+#%%
 # =============================================================================
 # Calculate brightness
 # =============================================================================
@@ -321,10 +325,10 @@ for index, gal in enumerate(galaxylist):
 # plt.hist(brightness_error, bins = 30)
 
 #%%
-np.savetxt('galaxy_brightness_analysis_results/brightness_data_2.txt',
-           np.c_[inner_mean_list, background_mean_list, backgroud_std_list,
-                 number_pixels_inner, number_pixels_outer],
-           header='inner_mean\t background_mean\t backgroudn_std\t inner_no_poitns\t outer_no_points')
+# np.savetxt('galaxy_brightness_analysis_results/brightness_data_2.txt',
+#            np.c_[inner_mean_list, background_mean_list, backgroud_std_list,
+#                  number_pixels_inner, number_pixels_outer],
+#            header='inner_mean\t background_mean\t backgroudn_std\t inner_no_poitns\t outer_no_points')
 
 
 

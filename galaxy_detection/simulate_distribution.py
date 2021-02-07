@@ -5,6 +5,7 @@ ipothesis of the bias from the border
 import numpy as np
 import numpy.random
 import scipy as sp
+import scipy.optimize
 import scipy.interpolate
 import sys 
 import matplotlib.pyplot as plt
@@ -23,13 +24,15 @@ def get_points(N, grad, intercept, lower_boundary, upper_boundary):
     return random_magnitude
 
 
-low = 7
-high = 20
-a = get_points(100000,0.36111444, -2.67273998,low,high)
+low = 18
+high = 24
+a = get_points(10000,0.36111444, -2.67273998,low,high)
 
 binrange = np.arange(low,high,0.3)
 
 totalN = []
+
+
 
 for bn in binrange:
     totalN.append(len(np.argwhere(a <= bn)))
@@ -40,9 +43,10 @@ skipfirst = 5
 binrange = binrange[5:]
 totalN = totalN[5:]
 
-plt.plot(binrange,np.log10(totalN))
+# plt.plot(binrange,np.log10(totalN), marker ='x', linestyle='None')
+plt.hist(a, bins = 20)
 
 
-    
+
     
     

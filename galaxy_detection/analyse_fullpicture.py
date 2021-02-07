@@ -19,6 +19,7 @@ imshow(starmask)
 # read header
 filename = "../Images/A1_mosaic.fits" # with frame but no star
 hdulist=fits.open(filename)
+original = hdulist[0].data
 header = hdulist[0].header
 hdulist.close()
 
@@ -47,21 +48,63 @@ imshow((conv[440:490,1580:1620]))
 # imshow(zscale(conv))
 plt.title('Convoluted image')
 # plt.savefig('nice_images/convolution.png',dpi=400)
+#%%
+filename = "nice_images/galaxy_rejection_area.fits" # with frame but no star
+hdulist=fits.open(filename)
+effectivemask = hdulist[0].data
+hdulist.close()
+
+# plot and save whole image
+plt.figure(figsize=(4,8))
+original2 = np.where(original==0,1,original)
+imshow(zscale(np.log(original2)))
+imshow(np.where(effectivemask==0,1,np.nan), cmap = 'cool', alpha = 0.4)
+
+ax = plt.gca()
+ax.set_xlabel('$x$ axis [pixel unit]')
+ax.set_ylabel('$y$ axis [pixel unit]')
+plt.tight_layout()
+plt.savefig('nice_images/originalimage.png', dpi = 400)
+
 
 #%%
+up, down, left, right = 1200, 1500, 1700, 2000
+plt.figure()
+imshow(zscale(image[up:down,left:right]), extent = (left, right, down, up))
+ax = plt.gca()
+ax.set_xlabel(r'$x$ axis - [$\mathtt{pixel\ unit}$]')
+ax.set_ylabel(r'$y$ axis - [$\mathtt{pixel\ unit}$]')
+plt.savefig('nice_images/original.png',dpi=400)
+
 
 plt.figure()
-imshow(zscale(image[1200:1500,1700:2000]))
-plt.title('zscale(original)')
-# plt.savefig('nice_images/original.png',dpi=400)
+imshow((conv[up:down,left:right]), extent=(left, right, down, up))#, cmap='coolwarm')
+plt.colorbar()
+ax = plt.gca()
+ax.set_xlabel(r'$x$ axis - [$\mathtt{pixel\ unit}$]')
+ax.set_ylabel(r'$y$ axis - [$\mathtt{pixel\ unit}$]')
+plt.savefig('nice_images/convolution.png',dpi=400)
+
+
+threshold=15
+mask=np.where(conv>threshold,1,0)
+plt.figure()
+imshow(mask[up:down,left:right], extent = (left, right, down, up))
+ax = plt.gca()
+ax.set_xlabel(r'$x$ axis - [$\mathtt{pixel\ unit}$]')
+ax.set_ylabel(r'$y$ axis - [$\mathtt{pixel\ unit}$]')
+plt.savefig('nice_images/mask.png',dpi=400)
+
+
+
+#%%
 
 # plt.xlim(1000,2000)
 # plt.ylim(2000,1000)
 threshold=15
 mask=np.where(conv>threshold,1,0)
 plt.figure()
-imshow(mask[440:490,1580:1620])
-plt.title(f'Mask, threshold: {threshold}')
+imshow(mask[up:down,left:right], extent = (left, right, down, up))
 # plt.savefig('nice_images/convolution_threshold.png',dpi=400)
 
 # save mask
