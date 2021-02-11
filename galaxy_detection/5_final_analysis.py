@@ -25,7 +25,6 @@ zscale=visualization.ZScaleInterval()
 data = np.loadtxt('galaxy_brightness_analysis_results/brightness_data_2.txt')
 
 filename = "../Images/A1_mosaic.fits" # with frame but no star
-#filename = "A1_mosaic_nostar.fits" # with frame but no star
 hdulist=fits.open(filename)
 header = hdulist[0].header
 hdulist.close()
@@ -39,14 +38,9 @@ hdulist.close()
 
 galaxylist = np.loadtxt('galaxy_brightness_analysis_results/galaxylist_cleaned.txt',skiprows = 1)
 
-
-def linear_function(x, a, b):
-    return a * x + b
-
-
 #%%
 
-###   plot background and its means
+###   plot background and its mean
 plt.figure()
 plt.plot(data[:,1], label = "mean background")
 plt.plot(data[:,2], label = "background std")
@@ -98,6 +92,7 @@ for i in range(len(galaxy_counts)):
 galaxy_mag = np.array(galaxy_mag)
 galaxy_mag_error = ( np.array(galaxy_mag_error)**2 + np.array(galaxy_mag_error_back)**2 + header["MAGZRR"]**2 )**0.5
 print(f'max magn: {galaxy_mag.max()}\nmin magn: {galaxy_mag.min()}')
+
 
 
 #%%
@@ -239,7 +234,7 @@ ax2.tick_params(axis='y', colors=ax2colour)
 ax2.set_ylabel(r'Poisson error $\div$ Brightness errors', rotation = -90,labelpad = 20,
                color=ax2colour)
 ax2.set_ylim(0,5)
-plt.savefig('galaxy_brightness_analysis_results/errors_comparison.png',dpi=400)
+# plt.savefig('galaxy_brightness_analysis_results/errors_comparison.png',dpi=400)
 
 
 

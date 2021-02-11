@@ -145,7 +145,7 @@ print(f'first galaxies: {galaxylist}')
 
 
 # uncomment to save the result (be careful not to overwrite existing data!)
-np.savetxt('located_galaxies_00/galaxypositions-final.txt',galaxylist)
+# np.savetxt('located_galaxies_00/galaxypositions-final.txt',galaxylist)
 
 
 # show(patchmask)

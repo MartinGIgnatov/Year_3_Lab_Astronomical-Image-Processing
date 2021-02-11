@@ -122,8 +122,7 @@ def get_petrosian_radius(row, col, image,mask):
     # # plt.savefig('nice_images/radius-nearby-galaxies.png',dpi = 400)
     
     # return radius_list, brightness_list
-# img = np.ones((40, 40))
-# get_petrosian_radius(300,300,image)
+
 
 #%%
 #Import actual image
@@ -140,9 +139,9 @@ hdulist.close()
 
 # import galaxylist
 galaxylist = np.loadtxt('galaxy_brightness_analysis_results/galaxylist_cleaned.txt')
-# galaxylist = np.loadtxt('located_galaxies_00/galaxypositions-final.txt')
 
-gal = galaxylist[2300] # 1000?
+
+gal = galaxylist[2300] # inspect galaxy 2300
 # 700 works well!
 # now 870 seems to be working: smaller outer circle
 # 380 nice proof of concept
@@ -150,6 +149,8 @@ gal = galaxylist[2300] # 1000?
 
 x,y = get_petrosian_radius(gal[0], gal[1], image, mask)
 print(x,y)
+
+
 #%%
 # =============================================================================
 # remove background first
@@ -203,12 +204,7 @@ def delete_galaxy(row, col, image,background_image):
         radius_list.append(inner_radius)
         brightness_list.append(brightness)
         index += 1
-    
-    # print(inner_circle.shape)
-    # plt.figure()
-    # imshow(patch * (inner_circle ^ 1))
-    # plt.title(f'radius: {inner_radius}')
-    
+
     
     background_image[row - halfside : row + halfside + 1,\
                           col - halfside : col + halfside + 1] *=  (inner_circle ^ 1)
@@ -231,14 +227,16 @@ for index, gal in enumerate(galaxylist):
 plt.figure()
 imshow(zscale(background_image))
 
-hdu = fits.PrimaryHDU(background_image)
-hdu.writeto('fake_images/background_image.fits')
+# save background image as a .fits
+# hdu = fits.PrimaryHDU(background_image)
+# hdu.writeto('photometry_files/background_image.fits')
+
 #%%
-np.savetxt('fake_images/radius_list.txt', radius_list)
+np.savetxt('photometry_files/radius_list.txt', radius_list)
 
 #%%
 # =============================================================================
-# Calculate brightness
+# Calculate brightness (i.e. counts)
 # =============================================================================
 
 def galaxy_brightness(row, col, image, background_image, radius):
@@ -278,9 +276,6 @@ def galaxy_brightness(row, col, image, background_image, radius):
     outerpatch = (patch_background * outer_crown)
     outer_values = outerpatch[outerpatch.nonzero()]
     
-    
-    # inner_values_cleaned = inner_values - background_mean
-    # brightness = np.sum(inner_values_cleaned)
 
     #record  data
     background_mean = np.mean(outer_values)
@@ -288,16 +283,6 @@ def galaxy_brightness(row, col, image, background_image, radius):
     inner_mean = np.mean(inner_values)
     number_pixels_inner = len(inner_values)
     number_pixels_outer = len(outer_values)
-    
-    # innersum = np.sum(inner_values)
-    # poisson_error_inner = np.sqrt(innersum) # adding poisson in quadrature
-                    
-    # brightness = innersum - number_pixels * background_mean
-    # std_error_background = number_pixels * np.std(outer_values)
-
-            
-    # total_error = np.sqrt(poisson_error_inner**2 + 15**2)
-            
                     
     return inner_mean, background_mean, background_std, number_pixels_inner, number_pixels_outer
 
@@ -319,16 +304,15 @@ for index, gal in enumerate(galaxylist):
     backgroud_std_list.append(output[2])
     number_pixels_inner.append(output[3])
     number_pixels_outer.append(output[4])
-# #%%
-# brightness_error = np.array(brightness_error)
-# print(brightness_error.max())
-# plt.hist(brightness_error, bins = 30)
+
 
 #%%
-# np.savetxt('galaxy_brightness_analysis_results/brightness_data_2.txt',
-#            np.c_[inner_mean_list, background_mean_list, backgroud_std_list,
-#                  number_pixels_inner, number_pixels_outer],
-#            header='inner_mean\t background_mean\t backgroudn_std\t inner_no_poitns\t outer_no_points')
+
+#save measured results
+np.savetxt('galaxy_brightness_analysis_results/brightness_data.txt',
+            np.c_[inner_mean_list, background_mean_list, backgroud_std_list,
+                  number_pixels_inner, number_pixels_outer],
+            header='inner_mean\t background_mean\t backgroudn_std\t inner_no_poitns\t outer_no_points')
 
 
 
